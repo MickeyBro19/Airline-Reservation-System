@@ -20,8 +20,6 @@ public class Airport {
     private long id;
 
     @Column(unique = true,length = 3)
-    @NotBlank
-    @Size(min = 3, max = 3)
     private String code;
 
     private String name;
