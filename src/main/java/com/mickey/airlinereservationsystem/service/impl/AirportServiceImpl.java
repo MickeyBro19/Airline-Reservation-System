@@ -21,15 +21,14 @@ public class AirportServiceImpl implements AirportService {
 
     @Override
     public AirportResponse createAirport(AirportRequest request) {
-        String code=request.code().trim().toUpperCase();
-        if(repo.existsByCode(code)){
+        if(repo.existsByCode(codeNormalization(request.code()))){
             throw new RuntimeException("Airport Already Exists");
         }
         Airport airport=Airport.builder()
                 .name(request.name())
                 .city(request.city())
                 .country(request.country())
-                .code(code)
+                .code(codeNormalization(request.code()))
                 .build();
         return mapToResponse(repo.save(airport));
 
@@ -37,7 +36,7 @@ public class AirportServiceImpl implements AirportService {
 
     @Override
     public AirportResponse getAirportByCode(String code) {
-        Airport airport = repo.findByCode(code.trim().toUpperCase())
+        Airport airport = repo.findByCode(codeNormalization(code))
                 .orElseThrow(() ->
                         new RuntimeException("Airport not found"));
         return mapToResponse(airport);
@@ -63,7 +62,7 @@ public class AirportServiceImpl implements AirportService {
 
     @Override
     public void deleteAirport(String code) {
-        Airport airport = repo.findByCode(code.trim().toUpperCase())
+        Airport airport = repo.findByCode(codeNormalization(code))
                 .orElseThrow(() ->
                         new RuntimeException("Airport not found"));
         repo.delete(airport);
@@ -78,5 +77,9 @@ public class AirportServiceImpl implements AirportService {
                 airport.getCity(),
                 airport.getCountry()
         );
+    }
+
+    private String codeNormalization(String code){
+        return code.trim().toUpperCase();
     }
 }
