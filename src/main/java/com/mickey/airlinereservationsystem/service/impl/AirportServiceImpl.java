@@ -44,7 +44,7 @@ public class AirportServiceImpl implements AirportService {
     }
 
     @Override
-    public Page<AirportResponse> getAllAirport(
+    public Page<AirportResponse> getAllAirports(
             int page,
             int size,
             String sortBy) {
