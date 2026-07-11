@@ -36,25 +36,27 @@ public class FlightServiceImpl implements FlightService {
         if(departureAirport.equals(arrivalAirport)) throw new RuntimeException("Departure and arrival can't be same");
         LocalDateTime departureTime=request.departureTime();
         LocalDateTime arrivalTime=request.arrivalTime();
-        if(departureTime.isAfter(arrivalTime)) throw new RuntimeException("Error time mismatch");
+        if(!departureTime.isBefore(arrivalTime)) throw new RuntimeException("Error time mismatch");
 
         Flight flight=Flight.builder()
-                .flightNumber(request.flightNumber())
+                .flightNumber(normalizeFlightNumber(request.flightNumber()))
                 .airline(request.airline())
                 .departureAirport(departureAirport)
                 .arrivalAirport(arrivalAirport)
                 .departureTime(departureTime)
                 .arrivalTime(arrivalTime)
+                .totalSeats(request.totalSeats())
                 .availableSeats(request.totalSeats())
                 .ticketPrice(request.ticketPrice())
                 .build();
 
-        return mapToResponse(flight);
-    }
+        Flight savedFlight = flightRepository.save(flight);
+
+        return mapToResponse(savedFlight);    }
 
     @Override
     public FlightResponse getFlight(String flightNumber) {
-            Flight flight=flightRepository.findByFlightNumber(flightNumber)
+            Flight flight=flightRepository.findByFlightNumber(normalizeFlightNumber(flightNumber))
                     .orElseThrow(()->new RuntimeException("Flight not exist"));
             return mapToResponse(flight);
     }
@@ -74,7 +76,7 @@ public class FlightServiceImpl implements FlightService {
 
     @Override
     public void deleteFlight(String flightNumber) {
-        Flight flight=flightRepository.findByFlightNumber(flightNumber)
+        Flight flight=flightRepository.findByFlightNumber(normalizeFlightNumber(flightNumber))
                 .orElseThrow(()->new RuntimeException("Flight not exist"));
         flightRepository.delete(flight);
     }
@@ -84,8 +86,8 @@ public class FlightServiceImpl implements FlightService {
                 flight.getId(),
                 flight.getFlightNumber(),
                 flight.getAirline(),
-                flight.getDepartureAirport(),
-                flight.getArrivalAirport(),
+                flight.getDepartureAirport().getCode(),
+                flight.getArrivalAirport().getCode(),
                 flight.getDepartureTime(),
                 flight.getArrivalTime(),
                 flight.getTicketPrice(),
@@ -97,5 +99,6 @@ public class FlightServiceImpl implements FlightService {
     private String codeNormalization(String code){
         return code.trim().toUpperCase();
     }
+    private String normalizeFlightNumber(String number){return number.trim().toUpperCase();}
 
 }
