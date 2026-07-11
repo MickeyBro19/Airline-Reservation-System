@@ -85,7 +85,6 @@ public class FlightServiceImpl implements FlightService {
 
     private FlightResponse mapToResponse(Flight flight){
         return new FlightResponse(
-                flight.getId(),
                 flight.getFlightNumber(),
                 flight.getAirline(),
                 flight.getDepartureAirport().getCode(),
