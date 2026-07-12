@@ -40,5 +40,6 @@ public class Booking {
             cascade = CascadeType.ALL)
     private Payment payment;
 
+    private String bookingReference;
 
 }

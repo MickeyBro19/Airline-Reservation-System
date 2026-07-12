@@ -44,6 +44,6 @@ public class Flight {
     private int availableSeats;
     private BigDecimal ticketPrice;
 
-    @OneToMany(mappedBy = "flight")
+    @OneToMany(mappedBy = "flight",cascade = CascadeType.ALL)
     private List<Booking> bookings;
 }
