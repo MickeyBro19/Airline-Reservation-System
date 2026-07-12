@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -82,6 +83,28 @@ public class FlightServiceImpl implements FlightService {
                 .orElseThrow(()->new RuntimeException("Flight not exist"));
         flightRepository.delete(flight);
     }
+
+    @Override
+    public Page<FlightResponse> searchFlights(String from, String to, LocalDate date, int page, int size, String sortBy) {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.plusDays(1).atStartOfDay();
+        Pageable pageable =
+                PageRequest.of(
+                        page,
+                        size,
+                        Sort.by(sortBy)
+                );
+        Page<Flight> flights =
+                flightRepository.searchFlights(
+                        normalizeAirportCode(from),
+                        normalizeAirportCode(to),
+                        start,
+                        end,
+                        pageable
+                );
+        return flights.map(this::mapToResponse);
+    }
+
 
     private FlightResponse mapToResponse(Flight flight){
         return new FlightResponse(

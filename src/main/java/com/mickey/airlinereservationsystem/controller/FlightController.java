@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/api/flight")
 @RequiredArgsConstructor
@@ -38,4 +40,26 @@ public class FlightController {
     public void deleteFlight(@PathVariable String flightNumber){
         flightService.deleteFlight(flightNumber);
     }
+
+    @GetMapping("/search")
+    public Page<FlightResponse> searchFlights(
+            @RequestParam String from,
+            @RequestParam String to,
+            @RequestParam LocalDate date,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "departureTime") String sortBy
+    ) {
+
+        return flightService.searchFlights(
+                from,
+                to,
+                date,
+                page,
+                size,
+                sortBy
+        );
+    }
+
+
 }
