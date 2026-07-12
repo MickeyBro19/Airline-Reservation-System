@@ -17,13 +17,13 @@ public interface FlightRepository extends JpaRepository<Flight,Long> {
 
     @Query(
             """
-SELECT f 
-from Flight f 
-where f.departureAirport.code= :from
-and f.arrivalAirport.code= :to
-and f.departureTime between :start and :end
-and f.availableSeats > 0
-"""
+                SELECT f 
+                from Flight f 
+                where f.departureAirport.code= :from
+                and f.arrivalAirport.code= :to
+                and f.departureTime between :start and :end
+                and f.availableSeats > 0
+            """
     )
     Page<Flight> searchFlights(
             @Param("from") String from,
