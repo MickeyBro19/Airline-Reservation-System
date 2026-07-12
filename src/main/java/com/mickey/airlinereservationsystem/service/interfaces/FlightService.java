@@ -2,6 +2,7 @@ package com.mickey.airlinereservationsystem.service.interfaces;
 
 import com.mickey.airlinereservationsystem.dto.FlightRequest;
 import com.mickey.airlinereservationsystem.dto.FlightResponse;
+import com.mickey.airlinereservationsystem.dto.FlightSearchRequest;
 import com.mickey.airlinereservationsystem.entity.Flight;
 import org.springframework.data.domain.Page;
 
@@ -20,9 +21,7 @@ public interface FlightService {
     void deleteFlight(String flightNumber);
 
     public Page<FlightResponse> searchFlights(
-            String from,
-            String to,
-            LocalDate date,
+FlightSearchRequest request,
             int page,
             int size,
             String sortBy);

@@ -2,6 +2,7 @@ package com.mickey.airlinereservationsystem.service.impl;
 
 import com.mickey.airlinereservationsystem.dto.FlightRequest;
 import com.mickey.airlinereservationsystem.dto.FlightResponse;
+import com.mickey.airlinereservationsystem.dto.FlightSearchRequest;
 import com.mickey.airlinereservationsystem.entity.Airport;
 import com.mickey.airlinereservationsystem.entity.Flight;
 import com.mickey.airlinereservationsystem.repository.AirportRepository;
@@ -85,9 +86,9 @@ public class FlightServiceImpl implements FlightService {
     }
 
     @Override
-    public Page<FlightResponse> searchFlights(String from, String to, LocalDate date, int page, int size, String sortBy) {
-        LocalDateTime start = date.atStartOfDay();
-        LocalDateTime end = date.plusDays(1).atStartOfDay();
+    public Page<FlightResponse> searchFlights(FlightSearchRequest request, int page, int size, String sortBy) {
+        LocalDateTime start = request.date().atStartOfDay();
+        LocalDateTime end = request.date().plusDays(1).atStartOfDay();
         Pageable pageable =
                 PageRequest.of(
                         page,
@@ -96,8 +97,8 @@ public class FlightServiceImpl implements FlightService {
                 );
         Page<Flight> flights =
                 flightRepository.searchFlights(
-                        normalizeAirportCode(from),
-                        normalizeAirportCode(to),
+                        normalizeAirportCode(request.from()),
+                        normalizeAirportCode(request.to()),
                         start,
                         end,
                         pageable

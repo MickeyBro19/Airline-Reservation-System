@@ -1,6 +1,7 @@
 package com.mickey.airlinereservationsystem.controller;
 import com.mickey.airlinereservationsystem.dto.FlightRequest;
 import com.mickey.airlinereservationsystem.dto.FlightResponse;
+import com.mickey.airlinereservationsystem.dto.FlightSearchRequest;
 import com.mickey.airlinereservationsystem.service.interfaces.FlightService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,18 +44,14 @@ public class FlightController {
 
     @GetMapping("/search")
     public Page<FlightResponse> searchFlights(
-            @RequestParam String from,
-            @RequestParam String to,
-            @RequestParam LocalDate date,
+            FlightSearchRequest request,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "departureTime") String sortBy
     ) {
 
         return flightService.searchFlights(
-                from,
-                to,
-                date,
+                request,
                 page,
                 size,
                 sortBy
