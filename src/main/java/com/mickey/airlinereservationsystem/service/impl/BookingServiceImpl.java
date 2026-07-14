@@ -36,9 +36,8 @@ public class BookingServiceImpl implements BookingService {
         if(!flight.getDepartureTime().isAfter(LocalDateTime.now())) {
             throw new RuntimeException("Flight has already departed.");
         }
-        if(flight.getAvailableSeats()<=0) throw new RuntimeException("No seats Available");
         if(bookingRepository.existsByFlightAndSeatNumber(flight,normalize(request.seatNumber()))) throw new RuntimeException("Already booked");
-        flight.setAvailableSeats(flight.getAvailableSeats()-1);
+        flight.reserveSeat();
         String bookingReference= getBookingReference(flight.getAirline(),request.flightNumber());
         LocalDateTime date=LocalDateTime.now();
 
@@ -64,6 +63,8 @@ public class BookingServiceImpl implements BookingService {
         return mapToResponse(bookingRepository.save(booking));
 
     }
+
+
 
     private String getBookingReference(String airline, String flightNumber) {
         int year=LocalDate.now().getYear();

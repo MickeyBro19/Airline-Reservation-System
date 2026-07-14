@@ -46,4 +46,17 @@ public class Flight {
 
     @OneToMany(mappedBy = "flight",cascade = CascadeType.ALL)
     private List<Booking> bookings;
+
+    @Version
+    private Long version;
+
+    public void reserveSeat(){
+
+        if(availableSeats <= 0){
+            throw new RuntimeException("Flight full booked");
+        }
+
+        availableSeats--;
+
+    }
 }
