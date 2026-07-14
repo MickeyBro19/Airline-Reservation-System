@@ -30,7 +30,6 @@ public class Booking {
 
     private LocalDateTime bookingDate;
 
-    @Column(unique = true)
     private String seatNumber;
 
     @Enumerated(EnumType.STRING)
