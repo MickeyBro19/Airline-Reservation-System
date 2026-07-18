@@ -3,6 +3,8 @@ package com.mickey.airlinereservationsystem.service.impl;
 import com.mickey.airlinereservationsystem.dto.AirportRequest;
 import com.mickey.airlinereservationsystem.dto.AirportResponse;
 import com.mickey.airlinereservationsystem.entity.Airport;
+import com.mickey.airlinereservationsystem.exception.AirportNotFoundException;
+import com.mickey.airlinereservationsystem.exception.DuplicateAirportException;
 import com.mickey.airlinereservationsystem.repository.AirportRepository;
 import com.mickey.airlinereservationsystem.service.interfaces.AirportService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,7 @@ public class AirportServiceImpl implements AirportService {
     @Override
     public AirportResponse createAirport(AirportRequest request) {
         if(repo.existsByCode(codeNormalization(request.code()))){
-            throw new RuntimeException("Airport Already Exists");
+            throw new DuplicateAirportException("Airport "+ codeNormalization(request.code()) +" already exists");
         }
         Airport airport=Airport.builder()
                 .name(request.name())
@@ -38,7 +40,7 @@ public class AirportServiceImpl implements AirportService {
     public AirportResponse getAirportByCode(String code) {
         Airport airport = repo.findByCode(codeNormalization(code))
                 .orElseThrow(() ->
-                        new RuntimeException("Airport not found"));
+                        new AirportNotFoundException("Airport not found"));
         return mapToResponse(airport);
     }
 
@@ -64,7 +66,7 @@ public class AirportServiceImpl implements AirportService {
     public void deleteAirport(String code) {
         Airport airport = repo.findByCode(codeNormalization(code))
                 .orElseThrow(() ->
-                        new RuntimeException("Airport not found"));
+                        new AirportNotFoundException("Airport not found"));
         repo.delete(airport);
 
     }

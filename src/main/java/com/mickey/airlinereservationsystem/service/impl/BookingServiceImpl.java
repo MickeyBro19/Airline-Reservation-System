@@ -8,6 +8,10 @@ import com.mickey.airlinereservationsystem.entity.Payment;
 import com.mickey.airlinereservationsystem.entity.User;
 import com.mickey.airlinereservationsystem.enums.PaymentStatus;
 import com.mickey.airlinereservationsystem.enums.TicketStatus;
+import com.mickey.airlinereservationsystem.exception.FlightAlreadyDepartedException;
+import com.mickey.airlinereservationsystem.exception.FlightNotFoundException;
+import com.mickey.airlinereservationsystem.exception.SeatAlreadyBookedException;
+import com.mickey.airlinereservationsystem.exception.UserNotFoundException;
 import com.mickey.airlinereservationsystem.repository.BookingRepository;
 import com.mickey.airlinereservationsystem.repository.FlightRepository;
 import com.mickey.airlinereservationsystem.repository.UserRepository;
@@ -32,13 +36,13 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse bookFlight(BookingRequest request) {
 
         User user=userRepository.findById(request.userId())
-                .orElseThrow(()->new RuntimeException("User not found"));
+                .orElseThrow(()->new UserNotFoundException("User not found"));
         Flight flight= flightRepository.findByFlightNumber(normalize(request.flightNumber()))
-                .orElseThrow(()->new RuntimeException("Flight Not Found"));
+                .orElseThrow(()->new FlightNotFoundException("Flight Not Found"));
         if(!flight.getDepartureTime().isAfter(LocalDateTime.now())) {
-            throw new RuntimeException("Flight has already departed.");
+            throw new FlightAlreadyDepartedException("Flight has already departed.");
         }
-        if(bookingRepository.existsByFlightAndSeatNumber(flight,normalize(request.seatNumber()))) throw new RuntimeException("Already booked");
+        if(bookingRepository.existsByFlightAndSeatNumber(flight,normalize(request.seatNumber()))) throw new SeatAlreadyBookedException("Seat Already booked");
 
         try{
             flight.reserveSeat();

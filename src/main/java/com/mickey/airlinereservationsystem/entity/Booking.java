@@ -9,11 +9,21 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Entity
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Builder
 @Data
+@Entity
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {
+                                "flight_id",
+                                "seat_number"
+                        }
+                )
+        }
+)
 public class Booking {
 
     @Id
