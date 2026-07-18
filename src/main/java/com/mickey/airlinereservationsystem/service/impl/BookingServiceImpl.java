@@ -14,6 +14,7 @@ import com.mickey.airlinereservationsystem.repository.UserRepository;
 import com.mickey.airlinereservationsystem.service.interfaces.BookingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -29,38 +30,49 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponse bookFlight(BookingRequest request) {
-        User user=userRepository.findById(request.userId())
-                .orElseThrow(()->new RuntimeException("User not found"));
-        Flight flight= flightRepository.findByFlightNumber(normalize(request.flightNumber()))
-                .orElseThrow(()->new RuntimeException("Flight Not Found"));
-        if(!flight.getDepartureTime().isAfter(LocalDateTime.now())) {
-            throw new RuntimeException("Flight has already departed.");
+        try{
+
+            User user=userRepository.findById(request.userId())
+                    .orElseThrow(()->new RuntimeException("User not found"));
+            Flight flight= flightRepository.findByFlightNumber(normalize(request.flightNumber()))
+                    .orElseThrow(()->new RuntimeException("Flight Not Found"));
+            if(!flight.getDepartureTime().isAfter(LocalDateTime.now())) {
+                throw new RuntimeException("Flight has already departed.");
+            }
+            if(bookingRepository.existsByFlightAndSeatNumber(flight,normalize(request.seatNumber()))) throw new RuntimeException("Already booked");
+            flight.reserveSeat();
+            String bookingReference= getBookingReference(flight.getAirline(),request.flightNumber());
+            LocalDateTime date=LocalDateTime.now();
+
+
+            Booking booking=Booking.builder()
+                    .user(user)
+                    .flight(flight)
+                    .bookingDate(date)
+                    .seatNumber(normalize(request.seatNumber()))
+                    .ticketStatus(TicketStatus.BOOKED)
+                    .bookingReference(bookingReference)
+                    .build();
+
+            Payment payment=Payment
+                    .builder()
+                    .booking(booking)
+                    .amount(flight.getTicketPrice())
+                    .paymentStatus(PaymentStatus.SUCCESS)
+                    .paymentDate(date)
+                    .build();
+            booking.setPayment(payment);
+
+            return mapToResponse(bookingRepository.save(booking));
         }
-        if(bookingRepository.existsByFlightAndSeatNumber(flight,normalize(request.seatNumber()))) throw new RuntimeException("Already booked");
-        flight.reserveSeat();
-        String bookingReference= getBookingReference(flight.getAirline(),request.flightNumber());
-        LocalDateTime date=LocalDateTime.now();
+        catch(ObjectOptimisticLockingFailureException ex){
 
+            throw new RuntimeException(
+                    "Another passenger booked this seat. Please try again."
+            );
 
-        Booking booking=Booking.builder()
-                .user(user)
-                .flight(flight)
-                .bookingDate(date)
-                .seatNumber(normalize(request.seatNumber()))
-                .ticketStatus(TicketStatus.BOOKED)
-                .bookingReference(bookingReference)
-                .build();
+        }
 
-        Payment payment=Payment
-                .builder()
-                .booking(booking)
-                .amount(flight.getTicketPrice())
-                .paymentStatus(PaymentStatus.SUCCESS)
-                .paymentDate(date)
-                .build();
-        booking.setPayment(payment);
-
-        return mapToResponse(bookingRepository.save(booking));
 
     }
 
