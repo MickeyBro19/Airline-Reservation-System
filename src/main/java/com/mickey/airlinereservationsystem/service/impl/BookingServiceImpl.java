@@ -30,16 +30,17 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponse bookFlight(BookingRequest request) {
-        try{
 
-            User user=userRepository.findById(request.userId())
-                    .orElseThrow(()->new RuntimeException("User not found"));
-            Flight flight= flightRepository.findByFlightNumber(normalize(request.flightNumber()))
-                    .orElseThrow(()->new RuntimeException("Flight Not Found"));
-            if(!flight.getDepartureTime().isAfter(LocalDateTime.now())) {
-                throw new RuntimeException("Flight has already departed.");
-            }
-            if(bookingRepository.existsByFlightAndSeatNumber(flight,normalize(request.seatNumber()))) throw new RuntimeException("Already booked");
+        User user=userRepository.findById(request.userId())
+                .orElseThrow(()->new RuntimeException("User not found"));
+        Flight flight= flightRepository.findByFlightNumber(normalize(request.flightNumber()))
+                .orElseThrow(()->new RuntimeException("Flight Not Found"));
+        if(!flight.getDepartureTime().isAfter(LocalDateTime.now())) {
+            throw new RuntimeException("Flight has already departed.");
+        }
+        if(bookingRepository.existsByFlightAndSeatNumber(flight,normalize(request.seatNumber()))) throw new RuntimeException("Already booked");
+
+        try{
             flight.reserveSeat();
             String bookingReference= getBookingReference(flight.getAirline(),request.flightNumber());
             LocalDateTime date=LocalDateTime.now();
